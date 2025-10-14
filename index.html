@@ -638,8 +638,8 @@
                     updateProgress(percentage);
                 });
 
-                // Use local FFmpeg files with absolute paths to avoid CORS issues
-                const baseURL = `${window.location.origin}/libs/ffmpeg-wasm`;
+                // Use relative paths to work with GitHub Pages subdirectory
+                const baseURL = './libs/ffmpeg-wasm';
 
                 console.log('Loading FFmpeg core files from:', baseURL);
 

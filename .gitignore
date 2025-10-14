@@ -36,7 +36,3 @@ Thumbs.db
 
 # Coverage directory used by testing tools
 coverage/
-
-# FFmpeg libraries
-libs/
-ffmpeg-util.js
