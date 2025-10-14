@@ -638,8 +638,9 @@
                     updateProgress(percentage);
                 });
 
-                // Use relative paths to work with GitHub Pages subdirectory
-                const baseURL = './libs/ffmpeg-wasm';
+                // Use absolute paths based on current page location to work with GitHub Pages
+                const currentPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                const baseURL = `${window.location.origin}${currentPath}libs/ffmpeg-wasm`;
 
                 console.log('Loading FFmpeg core files from:', baseURL);
 
