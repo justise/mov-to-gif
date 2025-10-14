@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "MOV to GIF converter landing page",
   "scripts": {
+    "start": "http-server -p 8080 -o",
     "dev": "http-server -p 8080 -o"
   },
   "dependencies": {

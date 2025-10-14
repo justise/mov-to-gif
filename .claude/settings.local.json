@@ -4,7 +4,8 @@
       "Bash(git remote add:*)",
       "Bash(yarn install)",
       "Bash(npx playwright install:*)",
-      "Bash(yarn test)"
+      "Bash(yarn test)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

@@ -238,6 +238,29 @@
             font-size: 0.9em;
         }
 
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f3f3f3;
+            border-radius: 4px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: #667eea;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
         .error-message {
             background: #fee;
             color: #c33;
@@ -316,12 +339,19 @@
             <div class="loading-spinner"></div>
             <div class="loading-text" id="loadingText">Converting to GIF...</div>
             <div class="loading-subtext">This may take a moment</div>
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText" style="display: none;">0%</div>
         </div>
     </div>
 
-    <script type="module">
-        import { FFmpeg } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm';
-        import { fetchFile, toBlobURL } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm';
+    <script src="libs/ffmpeg-wasm/ffmpeg.js"></script>
+    <script src="ffmpeg-util.js"></script>
+    <script>
+        // Use global variables from UMD bundles
+        const { FFmpeg } = FFmpegWASM;
+        const { fetchFile, toBlobURL } = FFmpegUtil;
 
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
@@ -339,6 +369,9 @@
         const convertAnotherBtn = document.getElementById('convertAnotherBtn');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const loadingText = document.getElementById('loadingText');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
 
         let ffmpeg = null;
         let currentFile = null;
@@ -419,29 +452,26 @@
             try {
                 ffmpeg = new FFmpeg();
 
-                // Use single-threaded version to avoid Web Worker CORS issues
-                const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core-st@0.12.6/dist/esm';
+                // Set up progress logging
+                ffmpeg.on('log', ({ message }) => {
+                    console.log(message);
+                });
+
+                ffmpeg.on('progress', ({ progress, time }) => {
+                    const percentage = Math.round(progress * 100);
+                    updateProgress(percentage);
+                });
+
+                // Use local FFmpeg files with absolute paths to avoid CORS issues
+                const baseURL = `${window.location.origin}/libs/ffmpeg-wasm`;
 
                 console.log('Loading FFmpeg core files from:', baseURL);
 
-                try {
-                    const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
-                    console.log('Core JS loaded');
-                    const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
-                    console.log('WASM loaded');
-
-                    await ffmpeg.load({
-                        coreURL,
-                        wasmURL
-                    });
-                } catch (e) {
-                    console.error('Failed to load with toBlobURL, trying direct URLs:', e);
-                    // Fallback to direct URLs if toBlobURL fails
-                    await ffmpeg.load({
-                        coreURL: `${baseURL}/ffmpeg-core.js`,
-                        wasmURL: `${baseURL}/ffmpeg-core.wasm`
-                    });
-                }
+                await ffmpeg.load({
+                    coreURL: `${baseURL}/ffmpeg-core.js`,
+                    wasmURL: `${baseURL}/ffmpeg-core.wasm`,
+                    workerURL: `${baseURL}/ffmpeg-core.worker.js`
+                });
 
                 console.log('FFmpeg loaded successfully');
             } catch (error) {
@@ -456,7 +486,7 @@
         async function convertToGif(file) {
             await initializeFFmpeg();
 
-            showLoading('Converting to GIF...');
+            showLoading('Converting to GIF...', true);
             errorMessage.classList.remove('active');
 
             try {
@@ -465,13 +495,14 @@
 
                 await ffmpeg.writeFile(inputFileName, await fetchFile(file));
 
-                // Default GIF conversion settings:
-                // - fps=10: 10 frames per second (smooth animation without huge file size)
-                // - scale=480:-1: width of 480px, height maintains aspect ratio
-                // - Using palettegen and paletteuse for better color quality
+                // Optimized GIF conversion settings for better performance:
+                // - fps=10: 10 frames per second (balance between quality and speed)
+                // - scale=320:-1: smaller width (320px) for faster processing
+                // - Using palettegen with stats_mode=single for faster palette generation
+                // - paletteuse with dither=bayer for good quality with less processing
                 await ffmpeg.exec([
                     '-i', inputFileName,
-                    '-vf', 'fps=10,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
+                    '-vf', 'fps=10,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen=stats_mode=single[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5',
                     '-loop', '0',
                     outputFileName
                 ]);
@@ -527,13 +558,29 @@
             generatedGifBlob = null;
         }
 
-        function showLoading(text) {
+        function showLoading(text, showProgress = false) {
             loadingText.textContent = text;
             loadingOverlay.classList.add('active');
+
+            if (showProgress) {
+                progressBar.style.display = 'block';
+                progressText.style.display = 'block';
+                updateProgress(0);
+            } else {
+                progressBar.style.display = 'none';
+                progressText.style.display = 'none';
+            }
         }
 
         function hideLoading() {
             loadingOverlay.classList.remove('active');
+            progressBar.style.display = 'none';
+            progressText.style.display = 'none';
+        }
+
+        function updateProgress(percentage) {
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${percentage}%`;
         }
 
         function formatFileSize(bytes) {
