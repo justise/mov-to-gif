@@ -261,6 +261,92 @@
             margin-top: 10px;
         }
 
+        .settings-panel {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .settings-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .setting-description {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .setting-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .setting-option {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .setting-option input[type="radio"] {
+            display: none;
+        }
+
+        .setting-option label {
+            display: block;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .setting-option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: #e8ebff;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .setting-option label:hover {
+            border-color: #667eea;
+        }
+
+        .option-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .option-subtitle {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .setting-option input[type="radio"]:checked + label .option-subtitle {
+            color: #667eea;
+        }
+
         .error-message {
             background: #fee;
             color: #c33;
@@ -317,6 +403,94 @@
                 <div class="file-info-item">
                     <span class="file-info-label">Duration:</span>
                     <span id="fileDuration">Loading...</span>
+                </div>
+            </div>
+
+            <div class="settings-panel">
+                <div class="settings-title">Conversion Settings</div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Quality / Size</label>
+                    <div class="setting-description">Higher quality produces larger files and takes longer to convert</div>
+                    <div class="setting-options">
+                        <div class="setting-option">
+                            <input type="radio" id="quality-low" name="quality" value="low">
+                            <label for="quality-low">
+                                <div class="option-title">Fast</div>
+                                <div class="option-subtitle">Small file, lower quality</div>
+                            </label>
+                        </div>
+                        <div class="setting-option">
+                            <input type="radio" id="quality-medium" name="quality" value="medium" checked>
+                            <label for="quality-medium">
+                                <div class="option-title">Balanced</div>
+                                <div class="option-subtitle">Good quality & speed</div>
+                            </label>
+                        </div>
+                        <div class="setting-option">
+                            <input type="radio" id="quality-high" name="quality" value="high">
+                            <label for="quality-high">
+                                <div class="option-title">High Quality</div>
+                                <div class="option-subtitle">Large file, best quality</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Frame Rate (FPS)</label>
+                    <div class="setting-description">Higher frame rate = smoother animation but larger file size</div>
+                    <div class="setting-options">
+                        <div class="setting-option">
+                            <input type="radio" id="fps-5" name="fps" value="5">
+                            <label for="fps-5">
+                                <div class="option-title">5 FPS</div>
+                                <div class="option-subtitle">Smallest file</div>
+                            </label>
+                        </div>
+                        <div class="setting-option">
+                            <input type="radio" id="fps-10" name="fps" value="10" checked>
+                            <label for="fps-10">
+                                <div class="option-title">10 FPS</div>
+                                <div class="option-subtitle">Balanced</div>
+                            </label>
+                        </div>
+                        <div class="setting-option">
+                            <input type="radio" id="fps-15" name="fps" value="15">
+                            <label for="fps-15">
+                                <div class="option-title">15 FPS</div>
+                                <div class="option-subtitle">Smoother</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Size</label>
+                    <div class="setting-description">Larger dimensions produce bigger files and take longer to process</div>
+                    <div class="setting-options">
+                        <div class="setting-option">
+                            <input type="radio" id="size-small" name="size" value="320">
+                            <label for="size-small">
+                                <div class="option-title">Small</div>
+                                <div class="option-subtitle">320px width</div>
+                            </label>
+                        </div>
+                        <div class="setting-option">
+                            <input type="radio" id="size-medium" name="size" value="480" checked>
+                            <label for="size-medium">
+                                <div class="option-title">Medium</div>
+                                <div class="option-subtitle">480px width</div>
+                            </label>
+                        </div>
+                        <div class="setting-option">
+                            <input type="radio" id="size-large" name="size" value="640">
+                            <label for="size-large">
+                                <div class="option-title">Large</div>
+                                <div class="option-subtitle">640px width</div>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -483,6 +657,37 @@
             hideLoading();
         }
 
+        function getConversionSettings() {
+            const quality = document.querySelector('input[name="quality"]:checked').value;
+            const fps = document.querySelector('input[name="fps"]:checked').value;
+            const size = document.querySelector('input[name="size"]:checked').value;
+
+            // Quality settings affect palette generation and dithering
+            const qualitySettings = {
+                low: {
+                    paletteStats: 'diff',
+                    maxColors: 128,
+                    dither: 'none'
+                },
+                medium: {
+                    paletteStats: 'diff',
+                    maxColors: 256,
+                    dither: 'bayer:bayer_scale=5'
+                },
+                high: {
+                    paletteStats: 'full',
+                    maxColors: 256,
+                    dither: 'sierra2_4a'
+                }
+            };
+
+            return {
+                fps: parseInt(fps),
+                size: parseInt(size),
+                ...qualitySettings[quality]
+            };
+        }
+
         async function convertToGif(file) {
             await initializeFFmpeg();
 
@@ -492,17 +697,24 @@
             try {
                 const inputFileName = 'input.mov';
                 const outputFileName = 'output.gif';
+                const settings = getConversionSettings();
 
                 await ffmpeg.writeFile(inputFileName, await fetchFile(file));
 
-                // Optimized GIF conversion settings for better performance:
-                // - fps=10: 10 frames per second (balance between quality and speed)
-                // - scale=320:-1: smaller width (320px) for faster processing
-                // - Using palettegen with stats_mode=single for faster palette generation
-                // - paletteuse with dither=bayer for good quality with less processing
+                // Build filter based on user settings
+                const palettegenFilter = `palettegen=stats_mode=${settings.paletteStats}:max_colors=${settings.maxColors}`;
+                const paletteuseFilter = settings.dither === 'none'
+                    ? 'paletteuse=dither=none'
+                    : `paletteuse=dither=${settings.dither}`;
+
+                const videoFilter = `fps=${settings.fps},scale=${settings.size}:-1:flags=lanczos,split[s0][s1];[s0]${palettegenFilter}[p];[s1][p]${paletteuseFilter}`;
+
+                console.log('Conversion settings:', settings);
+                console.log('FFmpeg filter:', videoFilter);
+
                 await ffmpeg.exec([
                     '-i', inputFileName,
-                    '-vf', 'fps=10,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen=stats_mode=single[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5',
+                    '-vf', videoFilter,
                     '-loop', '0',
                     outputFileName
                 ]);
