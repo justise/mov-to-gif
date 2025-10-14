@@ -380,7 +380,7 @@
 <body>
     <div class="container">
         <h1>MOV to GIF</h1>
-        <p class="subtitle">Upload your QuickTime MOV file to preview</p>
+        <p class="subtitle">Convert your videos to GIF entirely in your browser</p>
 
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">🎬</div>
@@ -389,6 +389,19 @@
         </div>
 
         <input type="file" id="fileInput" accept=".mov,video/quicktime">
+
+        <div style="background: #e8f4f8; border-left: 4px solid #4a9ebb; padding: 15px; border-radius: 8px; margin-top: 20px;">
+            <div style="display: flex; align-items: start; gap: 12px;">
+                <div style="font-size: 1.5em; color: #4a9ebb;">🔒</div>
+                <div>
+                    <strong style="color: #2c5f6f; display: block; margin-bottom: 5px;">100% Private & Client-Side</strong>
+                    <p style="color: #5a7f8f; font-size: 0.9em; line-height: 1.5; margin: 0;">
+                        Your files never leave your device. All conversion happens in your browser using WebAssembly.
+                        No uploads, no servers, no file size limits, no privacy concerns.
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <div class="preview-container" id="previewContainer">
             <video class="video-preview" id="videoPreview" controls></video>
