@@ -149,6 +149,95 @@
             transform: translateY(0);
         }
 
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .button-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .button-secondary:hover {
+            background: #f8f9ff;
+        }
+
+        .gif-preview-container {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .gif-preview-container.active {
+            display: block;
+        }
+
+        .gif-preview {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .loading-subtext {
+            color: #666;
+            font-size: 0.9em;
+        }
+
         .error-message {
             background: #fee;
             color: #c33;
@@ -208,13 +297,32 @@
                 </div>
             </div>
 
-            <button class="button" id="newFileBtn">Upload Another File</button>
+            <button class="button" id="convertBtn">Convert to GIF</button>
+            <button class="button button-secondary" id="newFileBtn">Upload Another File</button>
+        </div>
+
+        <div class="gif-preview-container" id="gifPreviewContainer">
+            <h2 style="color: #333; margin-bottom: 20px;">Generated GIF</h2>
+            <img class="gif-preview" id="gifPreview" alt="Generated GIF">
+            <button class="button" id="downloadBtn">Download GIF</button>
+            <button class="button button-secondary" id="convertAnotherBtn">Convert Another Video</button>
         </div>
 
         <div class="error-message" id="errorMessage"></div>
     </div>
 
-    <script>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">Converting to GIF...</div>
+            <div class="loading-subtext">This may take a moment</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { FFmpeg } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm';
+        import { fetchFile, toBlobURL } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm';
+
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const previewContainer = document.getElementById('previewContainer');
@@ -224,6 +332,17 @@
         const fileDuration = document.getElementById('fileDuration');
         const errorMessage = document.getElementById('errorMessage');
         const newFileBtn = document.getElementById('newFileBtn');
+        const convertBtn = document.getElementById('convertBtn');
+        const gifPreviewContainer = document.getElementById('gifPreviewContainer');
+        const gifPreview = document.getElementById('gifPreview');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const convertAnotherBtn = document.getElementById('convertAnotherBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+
+        let ffmpeg = null;
+        let currentFile = null;
+        let generatedGifBlob = null;
 
         uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -252,20 +371,137 @@
         });
 
         newFileBtn.addEventListener('click', () => {
-            previewContainer.classList.remove('active');
-            errorMessage.classList.remove('active');
-            fileInput.value = '';
-            videoPreview.src = '';
+            resetToUpload();
         });
+
+        convertAnotherBtn.addEventListener('click', () => {
+            resetToUpload();
+        });
+
+        convertBtn.addEventListener('click', async () => {
+            if (!currentFile) {
+                showError('No file selected for conversion.');
+                return;
+            }
+
+            try {
+                convertBtn.disabled = true;
+                await convertToGif(currentFile);
+            } catch (error) {
+                showError(`Conversion failed: ${error.message}`);
+                console.error('Conversion error:', error);
+            } finally {
+                convertBtn.disabled = false;
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!generatedGifBlob) {
+                showError('No GIF available to download.');
+                return;
+            }
+
+            const url = URL.createObjectURL(generatedGifBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = currentFile.name.replace(/\.[^/.]+$/, '.gif');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        async function initializeFFmpeg() {
+            if (ffmpeg) return;
+
+            showLoading('Loading FFmpeg...');
+
+            try {
+                ffmpeg = new FFmpeg();
+
+                // Use single-threaded version to avoid Web Worker CORS issues
+                const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core-st@0.12.6/dist/esm';
+
+                console.log('Loading FFmpeg core files from:', baseURL);
+
+                try {
+                    const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
+                    console.log('Core JS loaded');
+                    const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
+                    console.log('WASM loaded');
+
+                    await ffmpeg.load({
+                        coreURL,
+                        wasmURL
+                    });
+                } catch (e) {
+                    console.error('Failed to load with toBlobURL, trying direct URLs:', e);
+                    // Fallback to direct URLs if toBlobURL fails
+                    await ffmpeg.load({
+                        coreURL: `${baseURL}/ffmpeg-core.js`,
+                        wasmURL: `${baseURL}/ffmpeg-core.wasm`
+                    });
+                }
+
+                console.log('FFmpeg loaded successfully');
+            } catch (error) {
+                hideLoading();
+                console.error('FFmpeg load error:', error);
+                throw new Error(`Failed to load FFmpeg: ${error.message}`);
+            }
+
+            hideLoading();
+        }
+
+        async function convertToGif(file) {
+            await initializeFFmpeg();
+
+            showLoading('Converting to GIF...');
+            errorMessage.classList.remove('active');
+
+            try {
+                const inputFileName = 'input.mov';
+                const outputFileName = 'output.gif';
+
+                await ffmpeg.writeFile(inputFileName, await fetchFile(file));
+
+                // Default GIF conversion settings:
+                // - fps=10: 10 frames per second (smooth animation without huge file size)
+                // - scale=480:-1: width of 480px, height maintains aspect ratio
+                // - Using palettegen and paletteuse for better color quality
+                await ffmpeg.exec([
+                    '-i', inputFileName,
+                    '-vf', 'fps=10,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
+                    '-loop', '0',
+                    outputFileName
+                ]);
+
+                const data = await ffmpeg.readFile(outputFileName);
+                generatedGifBlob = new Blob([data.buffer], { type: 'image/gif' });
+                const gifUrl = URL.createObjectURL(generatedGifBlob);
+
+                gifPreview.src = gifUrl;
+                previewContainer.classList.remove('active');
+                gifPreviewContainer.classList.add('active');
+
+                console.log('Conversion successful');
+            } catch (error) {
+                throw new Error(`Conversion failed: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        }
 
         function handleFile(file) {
             errorMessage.classList.remove('active');
+            gifPreviewContainer.classList.remove('active');
 
             if (!file.type.includes('video')) {
                 showError('Please upload a valid video file (MOV format).');
                 return;
             }
 
+            currentFile = file;
             const url = URL.createObjectURL(file);
             videoPreview.src = url;
 
@@ -275,9 +511,29 @@
 
             videoPreview.addEventListener('loadedmetadata', () => {
                 fileDuration.textContent = formatDuration(videoPreview.duration);
-            });
+            }, { once: true });
 
             previewContainer.classList.add('active');
+        }
+
+        function resetToUpload() {
+            previewContainer.classList.remove('active');
+            gifPreviewContainer.classList.remove('active');
+            errorMessage.classList.remove('active');
+            fileInput.value = '';
+            videoPreview.src = '';
+            gifPreview.src = '';
+            currentFile = null;
+            generatedGifBlob = null;
+        }
+
+        function showLoading(text) {
+            loadingText.textContent = text;
+            loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
         }
 
         function formatFileSize(bytes) {

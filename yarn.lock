@@ -2,6 +2,23 @@
 # yarn lockfile v1
 
 
+"@ffmpeg/ffmpeg@^0.12.10":
+  version "0.12.15"
+  resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/@ffmpeg/ffmpeg/-/ffmpeg-0.12.15.tgz#e5b05c2b5c946f3464b3aa85461e4654a4649d80"
+  integrity sha512-1C8Obr4GsN3xw+/1Ww6PFM84wSQAGsdoTuTWPOj2OizsRDLT4CXTaVjPhkw6ARyDus1B9X/L2LiXHqYYsGnRFw==
+  dependencies:
+    "@ffmpeg/types" "^0.12.4"
+
+"@ffmpeg/types@^0.12.4":
+  version "0.12.4"
+  resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/@ffmpeg/types/-/types-0.12.4.tgz#aecd9b1a035882ee0bdf8853af37271a3b447473"
+  integrity sha512-k9vJQNBGTxE5AhYDtOYR5rO5fKsspbg51gbcwtbkw2lCdoIILzklulcjJfIDwrtn7XhDeF2M+THwJ2FGrLeV6A==
+
+"@ffmpeg/util@^0.12.1":
+  version "0.12.2"
+  resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/@ffmpeg/util/-/util-0.12.2.tgz#6bab9d8022a5bed9a6ff0933e5235b9b38698599"
+  integrity sha512-ouyoW+4JB7WxjeZ2y6KpRvB+dLp7Cp4ro8z0HIVpZVCM7AwFlHa0c4R8Y/a4M3wMqATpYKhC7lSFHQ0T11MEDw==
+
 ansi-styles@^4.1.0:
   version "4.3.0"
   resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/ansi-styles/-/ansi-styles-4.3.0.tgz#edd803628ae71c04c85ae7a0906edad34b648937"
@@ -104,6 +121,11 @@ follow-redirects@^1.0.0:
   version "1.15.11"
   resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/follow-redirects/-/follow-redirects-1.15.11.tgz#777d73d72a92f8ec4d2e410eb47352a56b8e8340"
   integrity sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==
+
+fsevents@2.3.2:
+  version "2.3.2"
+  resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
+  integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
 
 function-bind@^1.1.2:
   version "1.1.2"
@@ -232,6 +254,20 @@ opener@^1.5.1:
   version "1.5.2"
   resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
+
+playwright-core@1.56.0:
+  version "1.56.0"
+  resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/playwright-core/-/playwright-core-1.56.0.tgz#14b40ea436551b0bcefe19c5bfb8d1804c83739c"
+  integrity sha512-1SXl7pMfemAMSDn5rkPeZljxOCYAmQnYLBTExuh6E8USHXGSX3dx6lYZN/xPpTz1vimXmPA9CDnILvmJaB8aSQ==
+
+playwright@^1.40.0:
+  version "1.56.0"
+  resolved "https://npm.d.musta.ch/artifactory/api/npm/npm/playwright/-/playwright-1.56.0.tgz#71c533c61da33e95812f8c6fa53960e073548d9a"
+  integrity sha512-X5Q1b8lOdWIE4KAoHpW3SE8HvUB+ZZsUoN64ZhjnN8dOb1UpujxBtENGiZFE+9F/yhzJwYa+ca3u43FeLbboHA==
+  dependencies:
+    playwright-core "1.56.0"
+  optionalDependencies:
+    fsevents "2.3.2"
 
 portfinder@^1.0.28:
   version "1.0.38"

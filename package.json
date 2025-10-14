@@ -5,6 +5,10 @@
   "scripts": {
     "dev": "http-server -p 8080 -o"
   },
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.10",
+    "@ffmpeg/util": "^0.12.1"
+  },
   "devDependencies": {
     "http-server": "^14.1.1"
   },
