@@ -1,0 +1,18 @@
+{
+  "name": "mov-to-gif",
+  "version": "1.0.0",
+  "description": "MOV to GIF converter landing page",
+  "scripts": {
+    "dev": "http-server -p 8080 -o"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "keywords": [
+    "mov",
+    "gif",
+    "converter"
+  ],
+  "author": "",
+  "license": "MIT"
+}
