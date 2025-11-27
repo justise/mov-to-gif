@@ -3,12 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MOV to GIF Converter</title>
+    <title>MOV to GIF Converter - Free Online Video to GIF Tool | No Upload Required</title>
+    <meta name="description" content="Convert MOV videos to GIF animations for free, directly in your browser. 100% private - no uploads, no servers, no file size limits. Works with QuickTime screen recordings.">
+    <meta name="keywords" content="MOV to GIF, video converter, GIF maker, QuickTime to GIF, screen recording to GIF, online converter, free GIF converter, browser-based converter">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://justise.github.io/mov-to-gif/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://justise.github.io/mov-to-gif/">
+    <meta property="og:title" content="MOV to GIF Converter - Free Online Video to GIF Tool">
+    <meta property="og:description" content="Convert MOV videos to GIF animations for free, directly in your browser. 100% private - no uploads, no servers, no file size limits.">
+    <meta property="og:image" content="https://justise.github.io/mov-to-gif/og-image.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://justise.github.io/mov-to-gif/">
+    <meta name="twitter:title" content="MOV to GIF Converter - Free Online Video to GIF Tool">
+    <meta name="twitter:description" content="Convert MOV videos to GIF animations for free, directly in your browser. 100% private - no uploads, no servers, no file size limits.">
+    <meta name="twitter:image" content="https://justise.github.io/mov-to-gif/og-image.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MOV to GIF Converter",
+        "description": "Convert MOV videos to GIF animations for free, directly in your browser. 100% private - no uploads required.",
+        "url": "https://justise.github.io/mov-to-gif/",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and WebAssembly support",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "Client-side video conversion",
+            "No file uploads required",
+            "Adjustable quality settings",
+            "Adjustable frame rate",
+            "Multiple output sizes",
+            "Privacy-focused"
+        ]
+    }
+    </script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
         }
 
         body {
@@ -521,6 +571,14 @@
         </div>
 
         <div class="error-message" id="errorMessage"></div>
+
+
+        <p style="text-align: center; margin-top: 20px; font-size: .8rem;">
+            Authored by <a href="https://www.linkedin.com/in/krisgray/" target="_blank" rel="noopener noreferrer">Kris Gray</a> | 
+            <a href="https://github.com/justise/mov-to-gif" target="_blank" rel="noopener noreferrer">
+                GitHub
+            </a>
+        </p>
     </div>
 
     <div class="loading-overlay" id="loadingOverlay">
@@ -534,6 +592,7 @@
             <div class="progress-text" id="progressText" style="display: none;">0%</div>
         </div>
     </div>
+
 
     <script src="libs/ffmpeg-wasm/ffmpeg.js"></script>
     <script src="ffmpeg-util.js"></script>
